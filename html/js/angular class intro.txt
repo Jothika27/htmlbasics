@@ -1,0 +1,19 @@
+type script is super script of java script
+.ts extention
+.ts->.js  transpiling it will combine all the files it is called single page application
+view or masterpage or shell page default it will be called index page it will be run dynamically
+angular js 1s 
+angular - 2 it has mvc concept now angular-14
+view pure html
+controller logic 
+https://stackblitz.com/
+2 way binding typescripting
+package.json is equal to pom.xml
+devDependences equal to plugin
+jasmin unittesting tool
+karma js runner tool
+node js ,npm ,angular cli 3 components are need to run own system
+
+between the html tag means inline 
+or in the header scripting infile 
+or separate file means external file 

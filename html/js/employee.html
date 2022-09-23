@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        EMPLOYEE
+    </title>
+</head>
+
+<body>
+    <script>
+        class EMPLOYEE {
+            constructor(id,name,salary){
+                this.id=id;
+                this.name=name;
+                this.salary=salary;
+            }
+            display(){
+                document.writeln("ID="+this.id+" "+"\tNAME="+this.name+"\tSALARY="+this.salary);
+            }
+        }
+        var emp= new EMPLOYEE(12,"Jo",16000);
+        var emp1=new EMPLOYEE(09,"Hari",60000);
+        emp.display();
+        emp1.display();
+        document.writeln(typeof(emp));
+    </script>
+
+</body>
+
+</html>

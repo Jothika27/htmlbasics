@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>
+        Payment Form
+    </title>
+    <script>
+        function validateForm() {
+            var a = document.Payform.username.value;  //to get the name id
+            var cn = document.Payform.cardno.value;     //to get the card id
+            var regName = /^[A-Za-z]+$/;              // to check only characters
+            var cc = /^\d[16]$/;                       //to check only numbers
+            if (!regName.test(a)) {
+                window.alert("please enter only character");
+                return false;
+            }
+            if (!cc.test(cn)) {
+                window.alert("please enter only 16 numbers");
+                return false;
+            }
+            return true;
+        }
+    </script>
+    <style>
+        body {
+            margin: 0;
+            background-color: hsl(0, 0%, 98%);
+            color: #333;
+            font: 100% / normal sans-serif;
+        }
+
+        form {
+            box-sizing: border-box;
+            padding: 2rem;
+            border-radius: 1rem;
+            background-color: hsl(0, 0%, 100%);
+            border: 4px solid hsl(0, 0%, 90%);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            height: 1.5em;
+            width: 1.5em;
+            vertical-align: middle;
+        }
+
+        input[type="radio"] {
+            border-radius: 50%;
+        }
+
+        select {
+            background: 0.75rem;
+        }
+    </style>
+</head>
+
+<body>
+    <p>
+        Required fields are followed by
+        <strong><span aria-label="required">
+                <font color="red">*</font>
+            </span></strong>.</div>.
+    </p>
+    <form name="Payform" method="post" action="" onsubmit="return validateForm()">
+        <h1>Payment Form</h1>
+        <h2>Contact Info</h2>
+        <section>
+            <p>
+            <fieldset>
+                <legend>Salutation</legend>
+                Mr. <input type="radio" id="title_1" name="title" value="Mr." required="true" />
+                Mrs. <input type="radio" id="title_1" name="title" value="Mrs." required="true" />
+                Ms. <input type="radio" id="title_1" name="title" value="Ms." required="true" />
+            </fieldset>
+            </p>
+            <p>
+                <label for="name">
+                    <span>
+                        Name
+                    </span>
+                    <strong><span aria-label="required">
+                            <font color="red">*</font>
+                        </span></strong>
+                </label>
+                <input type="text" id="name" name="username" required="true" />
+            </p>
+            <p>
+                <label for="email">
+                    <span>
+                        E-mail
+                    </span>
+                    <strong><span aria-label="required">
+                            <font color="red">*</font>
+                        </span></strong>
+                </label>
+                <input type="email" id="mail" name="usermail" required="true" />
+            </p>
+            <p>
+                <label for="pwd">
+                    <span>
+                        Password
+                    </span>
+                    <strong><span aria-label="required">
+                            <font color="red">*</font>
+                        </span></strong>
+                </label>
+                <input type="password" id="pwd" name="pwd" required="true" />
+            </p>
+        </section>
+        <section>
+            <h1>Payment Info</h1>
+            <p>
+                <label for="card">
+                    <span>
+                        Card Type
+                    </span>
+                </label>
+                <select name="card" id="card">
+                    <option value="visa">Visa</option>
+                    <option value="mc">MasterCard</option>
+                    <option value="upi">UPI</option>
+                </select>
+            </p>
+            <p>
+                <label for="cardNo">
+                    <span>
+                        Card Number
+                    </span>
+                    <strong><span aria-label="required">
+                            <font color="red">*</font>
+                        </span></strong>
+                </label>
+                <input type="number" id="cardno" name="cardno" required="true" />
+            </p>
+            <p>
+                <label for="expiry">
+                    <span>
+                        Expiration Date
+                    </span>
+                </label>
+                <input type="text" id="expiration" name="expiry" required="true" placeholder="MM/YY" />
+            </p>
+        </section>
+        <section>
+            <p>
+                <button type="submit">
+                    Submit
+                </button>
+                <button type="submit">
+                    Reset
+                </button>
+            </p>
+        </section>
+    </form>
+</body>
+
+</html>

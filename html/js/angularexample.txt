@@ -1,0 +1,602 @@
+export class User {
+  id: number;
+  userid: string;
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+  constructor(values: Object = {}) {
+    Object.assign(this, values);
+  }
+}
+=================================================================
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+@Injectable({
+  providedIn: 'root',
+})
+export class UserService {
+  private url = 'https://shravantimesheet.herokuapp.com/api/users/';
+  // private url = 'http://localhost:8080/api/users/';
+  constructor(private httpClient: HttpClient) {}
+  public getAllUsersService() {
+    return this.httpClient.get(this.url);
+  }
+  public validate(user) {
+    const headers = { 'content-type': 'application/json' };
+    return this.httpClient.post(
+      this.url + 'uservalidation',
+      JSON.stringify(user),
+      {
+        headers: headers,
+      }
+    );
+  }
+  public createUserService(user) {
+    const headers = { 'content-type': 'application/json' };
+    return this.httpClient.post(this.url, JSON.stringify(user), {
+      headers: headers,
+    });
+  }
+  public getUserService(id) {
+    return this.httpClient.get(this.url + id);
+  }
+  public deleteUserService(id) {
+    return this.httpClient.delete(this.url + id);
+  }
+  public updateUserService(id, user) {
+    const headers = { 'content-type': 'application/json' };
+    return this.httpClient.put(this.url + id, JSON.stringify(user), {
+      headers: headers,
+    });
+  }
+}
+=================================================================
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
+import { TaskService } from '../task/task.service';
+import { User } from './user';
+import { UserService } from './user.service';
+@Component({
+  selector: 'app-user',
+  templateUrl: './user.component.html',
+  styleUrls: ['./user.component.css'],
+})
+export class UserComponent implements OnInit {
+  passwordsMatching: boolean = false;
+  isConfirmPasswordDirty: boolean = false;
+  confirmPasswordClass: string = 'form-control';
+  submitted = false;
+  name = 'Angular';
+  users = [];
+  model = new User();
+  editmodel = new User();
+  currentUser;
+  currentUserRole;
+  clickedUserTasks = [];
+  allTasks = [];
+  cuser = new User();
+  @ViewChild('editTaskModal') editTaskModal;
+  deleteid = 0;
+  constructor(private userService: UserService, private taskService: TaskService,private router: Router) {}
+  ngOnInit() {
+    this.currentUser = localStorage.getItem('wsuser');
+    let currentUserRole = localStorage.getItem('wsuserRole');
+    if (currentUserRole === 'Admin') {
+      this.model.role = 'User';
+      this.getAllUsers();
+    } else {
+      this.router.navigate(['/accessdenied']);
+    }
+    this.getAllTasks();
+  }
+  getAllUsers() {
+    this.userService.getAllUsersService().subscribe((data: any[]) => {
+      console.log(data);
+      this.users = data;
+    });
+  }
+  getAllTasks() {
+    this.taskService.getAllTasksService().subscribe((data: any[]) => {
+      this.allTasks = data;
+    });
+  }
+  viewUser(who) {
+    this.cuser = this.users.filter((x) => x.name == who)[0];
+    this.clickedUserTasks = this.allTasks.filter((x) => x.assigneto === who);
+  }
+  addUser() {
+    alert(this.submitted);
+    if (!this.model.id) {
+      this.userService.createUserService(this.model).subscribe((data) => {
+        this.getAllUsers();
+        this.model = new User();
+        document.getElementById('addTaskModal').click();
+      });
+    } else {
+      console.log(this.model);
+      this.userService
+        .updateUserService(this.model.id, this.model)
+        .subscribe((data) => {
+          this.getAllUsers();
+          this.model = new User();
+          document.getElementById('editTaskModal').click();
+        });
+    }
+  }
+  editUser(id) {
+    alert(id);
+    this.userService.getUserService(id).subscribe((data: any) => {
+      this.model = data;
+    });
+  }
+  // a(id1)
+  deleteUser(id) {
+    alert(id);
+    this.deleteid = id;
+  }
+  remove() {
+    this.userService.deleteUserService(this.deleteid).subscribe((data) => {
+      this.getAllUsers();
+      this.deleteid = 0;
+      document.getElementById('deleteTaskModal').click();
+    });
+  }
+  checkPasswords(f): boolean {
+    this.isConfirmPasswordDirty = true;
+    console.log(this.model);
+    if (
+      Object.keys(this.model).length !== 0 &&
+      this.model.password === f.cpassword
+    ) {
+      this.passwordsMatching = true;
+      this.confirmPasswordClass = 'form-control is-valid';
+      return true;
+    } else {
+      this.passwordsMatching = false;
+      // this.isConfirmPasswordDirty = false;
+      this.confirmPasswordClass = 'form-control is-invalid';
+      return false;
+    }
+  }
+}
+=========================================================
+<div class="container" style="padding-left:135px">
+  <div class="table-responsive">
+    <div class="table-wrapper">
+      <div class="table-title">
+        <div class="row">
+          <div class="col-xs-6">
+            <h2>Manage <b>Users</b></h2>
+          </div>
+          <div class="col-xs-6 text-right" style="padding:20px">
+            <a href="#addTaskModal" class="btn btn-success" data-toggle="modal">
+              <!-- <i class="material-icons">&#xE147;</i> -->
+              <span>Add New User</span></a
+            >
+            <!-- <a href="#deleteTaskModal" class="btn btn-danger" data-toggle="modal"><i
+            class="material-icons">&#xE15C;</i> <span>Delete</span></a> -->
+          </div>
+        </div>
+      </div>
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>User Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <!-- tbody -->
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td>{{ user.userid }}</td>
+            <td>
+              <a
+                class="delete"
+                href="#viewUserModal"
+                data-toggle="modal"
+                (click)="viewUser(user.name)"
+                >{{ user.name }}</a
+              >
+            </td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td>
+              <a
+                class="edit"
+                href="#editTaskModal"
+                data-toggle="modal"
+                class="material-icons"
+                (click)="editUser(user.id)"
+                >&#xE254;</a
+              >
+              <a
+                class="delete"
+                href="#deleteTaskModal"
+                data-toggle="modal"
+                class="material-icons"
+                (click)="deleteUser(user.id)"
+                >&#xE872;</a
+              >
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- Edit Modal HTML -->
+<div id="addTaskModal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- <form (submit)="onSubmit() && addUser()" name="form" (ngSubmit)="checkPasswords(f) " #f="ngForm"> -->
+      <form
+        #f="ngForm"
+        name="form"
+        (ngSubmit)="f.form.valid && addUser()"
+        novalidate
+      >
+        <!-- <form (submit)="addUser()"> -->
+        <div class="modal-header">
+          <h4 class="modal-title">Add User</h4>
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-hidden="true"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>User ID</label>
+            <!-- <input type="text" class="form-control" required /> -->
+            <input
+              type="text"
+              placeholder="userid"
+              id="userid"
+              #ui="ngModel"
+              [(ngModel)]="model.userid"
+              name="userid"
+              class="form-control"
+              [ngClass]="{ 'is-invalid': f.submitted && ui.invalid }"
+              required
+            />
+            <div *ngIf="f.submitted && ui.invalid" class="invalid-feedback">
+              <div *ngIf="ui.errors.required">UserID is required</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>User Name</label>
+            <!-- <input type="text" class="form-control" required /> -->
+            <input
+              type="text"
+              placeholder="user name"
+              id="name"
+              [(ngModel)]="model.name"
+              name="name"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>E-mail address</label>
+            <!-- <input type="text" class="form-control" required /> -->
+            <input
+              type="email"
+              placeholder="email"
+              id="email"
+              [(ngModel)]="model.email"
+              name="email"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <!-- <input type="email" class="form-control" required /> -->
+            <input
+              type="password"
+              id="password"
+              [(ngModel)]="model.password"
+              name="password"
+              placeholder="password"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <!-- <input type="email" class="form-control" required /> -->
+            <input
+              type="password"
+              id="CPassword"
+              placeholder="Password"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Role</label>
+            <!-- <textarea class="form-control" required></textarea> -->
+            <select
+              id="role"
+              class="form-control"
+              [(ngModel)]="model.role"
+              name="role"
+              required
+            >
+              <option value="Admin">Admin</option>
+              <option value="User">User</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <input
+            type="button"
+            class="btn btn-default"
+            data-dismiss="modal"
+            value="Cancel"
+          />
+          <input type="submit" class="btn btn-success" value="Add" />
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- Edit Modal HTML -->
+<div id="editTaskModal" class="modal fade">
+  <a href="#editTaskModal" class="btn btn-success" data-toggle="modal"></a>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="profileForm" (submit)="addUser()">
+        <div class="modal-header">
+          <h4 class="modal-title">Edit User</h4>
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-hidden="true"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>User ID</label>
+            <!-- <input type="text" class="form-control" required /> -->
+            <input
+              type="text"
+              placeholder="userid"
+              id="userid"
+              [(ngModel)]="model.userid"
+              name="userid"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>User Name</label>
+            <!-- <input type="text" class="form-control" required /> -->
+            <input
+              type="text"
+              placeholder="user name"
+              id="name"
+              [(ngModel)]="model.name"
+              name="name"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>E-mail address</label>
+            <!-- <input type="text" class="form-control" required /> -->
+            <input
+              type="email"
+              placeholder="email"
+              id="email"
+              [(ngModel)]="model.email"
+              name="email"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <!-- <input type="email" class="form-control" required /> -->
+            <input
+              type="password"
+              id="editPassword"
+              [(ngModel)]="model.password"
+              name="password"
+              placeholder="Password"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <!-- <input type="email" class="form-control" required /> -->
+            <input
+              type="password"
+              id="editCPassword"
+              placeholder="Password"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Role</label>
+            <!-- <textarea class="form-control" required></textarea> -->
+            <select
+              id="role"
+              class="form-control"
+              [(ngModel)]="model.role"
+              name="role"
+              required
+            >
+              <option value="Admin">Admin</option>
+              <option value="User">User</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <input
+            type="button"
+            class="btn btn-default"
+            data-dismiss="modal"
+            value="Cancel"
+          />
+          <input type="submit" #btnId class="btn btn-info" value="Save" />
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- Delete Modal HTML -->
+<div id="deleteTaskModal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="deleteprofile" (submit)="remove()">
+        <div class="modal-header">
+          <h4 class="modal-title">Delete User</h4>
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-hidden="true"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete these Records?</p>
+          <p class="text-warning">
+            <small>This action cannot be undone.</small>
+          </p>
+        </div>
+        <div class="modal-footer">
+          <input
+            type="button"
+            class="btn btn-default"
+            data-dismiss="modal"
+            value="Cancel"
+          />
+          <input type="submit" class="btn btn-danger" value="Delete" />
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div id="viewUserModal" class="modal fade">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="viewForm" (submit)="viewTask()">
+        <div class="modal-header">
+          <h4 class="modal-title">View User</h4>
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-hidden="true"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <div id="parent">
+              <h5 style="text-align:w3-animate-left">
+                {{
+                  this.cuser.userid +
+                    ' | ' +
+                    this.cuser.name +
+                    ' | ' +
+                    this.cuser.email +
+                    ' | ' +
+                    this.cuser.role
+                }}
+              </h5>
+            </div>
+            <div id="left">
+              <h5 style="text-align:w3-animate-left">All Tasks</h5>
+              <div class="card-wrapper" style="width: 20em;">
+                <mat-card
+                  class="example-card"
+                  *ngFor="let card of clickedUserTasks"
+                >
+                  <mat-card-header>
+                    <mat-card-title>
+                      {{ card.taskname }}
+                    </mat-card-title>
+                    <mat-card-subtitle>
+                      <p>{{ card.assigneto }}</p>
+                      <p>{{ card.assignedate }}</p>
+                      <p>{{ card.status }}</p>
+                    </mat-card-subtitle>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <p>
+                      {{ card.description }}
+                    </p>
+                  </mat-card-content>
+                  <mat-card-actions> </mat-card-actions>
+                </mat-card>
+              </div>
+            </div>
+          </div>
+        </div>
+		</form>
+		</div>
+		</div>
+		</div>
+appcomponent.ts
+		
+import { Component, VERSION } from '@angular/core';
+
+@Component({
+  selector: 'my-app',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css'],
+})
+export class AppComponent {
+  name = 'Angular ' + VERSION.major;
+  imgurl = '';
+  btn: string;
+  fullname = 'jothika';
+  user = { name: 'jothika' };
+  onSave($event) {
+    alert('event called');
+    this.btn = 'event called';
+  }
+}
+
+appcomponent.html
+
+<hello name="{{ name }}"></hello>
+<p>
+  Start editing to see some magic happen :)
+</p>
+{{name}}
+<div><img [src]="imgurl" /></div>
+<div>
+<button (click)="onSave($event)" >save</button>
+{{btn}}
+</div>
+<div>
+  <input [(ngModel)]="fullname" >
+  {{fullname}}
+</div>
+<div>
+<input [(ngModel)]="user.name" >
+{{user.name}}
+</div>
+
+
+
+		

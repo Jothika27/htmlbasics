@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> JS Example</title>
+    <script>
+        function myName() {
+            var name1 = document.getElementById("nameV").value;
+            alert('Hello ' + name1);
+            document.getElementById("msg").innerHTML=name1;
+        }
+    </script>
+</head>
+
+<body>
+    <!-- <script src="javascript/arrayDemo.js"></script> -->
+    <form>
+        <input type="text" id="nameV" />
+        <input type="button" value="print" onclick="myName()" />
+        <p>
+            <span id="msg" style="color: black"></span>
+        </p>
+    </form>
+</body>
+
+</html>

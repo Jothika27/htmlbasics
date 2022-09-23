@@ -1,0 +1,37 @@
+[
+	{
+		"name": "Jo",
+		"employee_id": "30014",
+		"dob": "27-04-2001",
+		"weight": 45.8,
+		"age": 21
+	},
+	{
+		"name": "Santhosh",
+		"employee_id": "30084",
+		"dob": "21-07-2000",
+		"weight": 81.8,
+		"age": 22
+	},
+	{
+		"name": "Harish",
+		"employee_id": "30087",
+		"dob": "30-10-1999",
+		"weight": 60.7,
+		"age": 23
+	},
+	{
+		"name": "Ganesh",
+		"employee_id": "30034",
+		"dob": "15-09-2000",
+		"weight": 65.8,
+		"age": 22
+	},
+	{
+		"name": "Madhan",
+		"employee_id": "30024",
+		"dob": "05-10-1999",
+		"weight": 80.3,
+		"age": 23
+	}
+]

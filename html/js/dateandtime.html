@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>
+            Date and Time
+        </title>
+    </head>
+    <body>
+        <script>
+            const cur_date=new Date();
+            const toda=cur_date.toDateString();
+            console.log(toda);
+            const cur_time=cur_date.toLocaleTimeString();
+            console.log(cur_time);
+            console.log(cur_date.getUTCDate()+" "+cur_date.getDay()+" "+cur_date.getFullYear());
+
+        </script>
+    </body>
+</html>
